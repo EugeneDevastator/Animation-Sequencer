@@ -117,6 +117,7 @@ namespace BrunoMikoski.AnimationSequencer
             reorderableList.serializedProperty.serializedObject.ApplyModifiedProperties();
         }
         
+
         private void OnListOrderChanged(ReorderableList list)
         {
             SerializedPropertyExtensions.ClearPropertyCache(list.serializedProperty.propertyPath);
@@ -315,12 +316,7 @@ namespace BrunoMikoski.AnimationSequencer
                 GUI.enabled = DOTweenEditorPreview.isPreviewing;
                 if (GUILayout.Button(AnimationSequenceEditorGUIUtility.StopButtonGUIContent, previewButtonStyle))
                 {
-                    sequencerController.Rewind();
-                    DOTween.Kill(sequencerController.PlayingSequence);
-                    DOTweenEditorPreview.Stop();
-                    sequencerController.ResetToInitialState();
-                    sequencerController.ClearPlayingSequence();
-                    showStepsPanel = wasShowingStepsPanel;
+                    ExitPreviewMode();
                 }
             }
 
@@ -329,6 +325,16 @@ namespace BrunoMikoski.AnimationSequencer
             EditorGUILayout.EndHorizontal();
             DrawTimeScaleSlider();
             DrawProgressSlider();
+        }
+
+        private void ExitPreviewMode()
+        {
+            sequencerController.Rewind();
+            DOTween.Kill(sequencerController.PlayingSequence);
+            DOTweenEditorPreview.Stop();
+            sequencerController.ResetToInitialState();
+            sequencerController.ClearPlayingSequence();
+            showStepsPanel = wasShowingStepsPanel;
         }
 
         private void StepBack()
@@ -357,8 +363,8 @@ namespace BrunoMikoski.AnimationSequencer
                 {
                     DOTweenEditorPreview.Start();
 
-                    sequencerController.Play();
-                    
+                    sequencerController.Play(ExitPreviewMode);
+
                     DOTweenEditorPreview.PrepareTweenForPreview(sequencerController.PlayingSequence);
                 }
                 else
@@ -470,14 +476,14 @@ namespace BrunoMikoski.AnimationSequencer
             FlowType flowType = (FlowType)flowTypeSerializedProperty.enumValueIndex;
 
             int baseIdentLevel = EditorGUI.indentLevel;
-            
+
             GUIContent guiContent = new GUIContent(element.displayName);
             if (animationStepBase != null)
                 guiContent = new GUIContent(animationStepBase.GetDisplayNameForEditor(index + 1));
 
             if (flowType == FlowType.Join)
                 EditorGUI.indentLevel = baseIdentLevel + 1;
-            
+
             rect.height = EditorGUIUtility.singleLineHeight;
             rect.x += 10;
             rect.width -= 20;
@@ -491,12 +497,12 @@ namespace BrunoMikoski.AnimationSequencer
 
             EditorGUI.indentLevel = baseIdentLevel;
         }
-        
+
         private float GetAnimationStepHeight(int index)
         {
             SerializedProperty element = reorderableList.serializedProperty.GetArrayElementAtIndex(index);
             return element.GetPropertyDrawerHeight();
-            
+
         }
     }
 }
